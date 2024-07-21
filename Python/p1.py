@@ -18,48 +18,40 @@ from queue import PriorityQueue
 def best_first_search(graph, start, goal, heuristic):
     visited = set()
     pq = PriorityQueue()
-    pq.put((0, start))
-    parent = {start: None}
-    path_cost = {start: 0} 
-    
+    pq.put((heuristic[start], start))
+    total = 0
+
     while not pq.empty():
-        current_cost, node = pq.get()
+        h, node = pq.get()
+        total += h
         
         if node == goal:
-            break
+            print(f"Goal reached: {node}")
+            print(f"Total heuristic cost: {total}")
+            return
         
         if node not in visited:
+            print(f"Visiting node: {node} ")
             visited.add(node)
-            for neighbor, edge_cost in graph[node].items():
-                new_cost = path_cost[node] + edge_cost
-                if neighbor not in path_cost or new_cost < path_cost[neighbor]:
-                    path_cost[neighbor] = new_cost
-                    total_cost = new_cost + heuristic[neighbor]
-                    pq.put((total_cost, neighbor))
-                    parent[neighbor] = node
-    if goal not in parent:
-        return [],float('inf')
+            
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    pq.put((heuristic[neighbor], neighbor))
     
-    path = []
-    node = goal
-    while node is not None:
-        path.append(node)
-        node = parent[node]
-    path.reverse()
-    
-    return path, path_cost.get(goal, float('inf'))
+    print("Goal not found!")
+    print(f"Total heuristic cost: {total}")
 
 graph = {
-    'S': {'A': 1, 'B': 2},
-    'A': {'C': 3, 'D': 4},
-    'B': {'E': 5, 'F': 6},
-    'C': {},
-    'D': {},
-    'E': {'H': 1},
-    'F': {'I': 2, 'G': 3},
-    'H': {},
-    'I': {},
-    'G': {},
+    'S': ['A', 'B'],
+    'A': ['C','D'],
+    'B': ['E', 'F'],
+    'C':[],
+    'D': [],
+    'E': ['H'],
+    'F': ['I', 'G'],
+    'H': [],
+    'I': [],
+    'G': []
 }
 
 start_node = 'S'
@@ -75,13 +67,7 @@ heuristic_values = {
     'F': 2,
     'H': 4,
     'I': 9,
-    'G': 0,
+    'G':0
 }
 
-path, total_cost = best_first_search(graph, start_node, goal_node, heuristic_values)
-if not path:
-    print("Not Found")
-else:
-    print("Best First Search Path:", path)
-    print("Total Cost:", total_cost)
-    print("Number of Nodes Visited : ",len(path))
+best_first_search(graph, start_node, goal_node, heuristic_values)
