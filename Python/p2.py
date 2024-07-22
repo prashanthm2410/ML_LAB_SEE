@@ -39,7 +39,8 @@ def astar(graph, start, goal, heuristic):
                     total_cost = new_cost + heuristic[neighbor]
                     pq.put((total_cost, neighbor))
                     parent[neighbor] = node
-    
+    if goal not in parent:
+        return [], 0
     path = []
     node = goal
     total_cost = 0
@@ -74,6 +75,9 @@ heuristic_values = {
 }
 
 path, total_cost = astar(graph, start_node, goal_node, heuristic_values)
-print("Best First Search Path:", path)
-print("Total Cost:", total_cost)
-print("Number of Nodes Visited:", len(path))
+if not path:
+    print("No Path Found!")
+else:
+    print("Best First Search Path:", path)
+    print("Total Cost:", total_cost)
+    print("Number of Nodes Visited:", len(path))
