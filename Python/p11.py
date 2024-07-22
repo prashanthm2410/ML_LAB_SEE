@@ -1,45 +1,63 @@
 import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import Adam
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module='keras')
+
+def step(x):
+    return np.where(x >= 0, 1, 0)
 
 X_and = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y_and = np.array([0, 0, 0, 1])
+y_and = np.array([[0], [0], [0], [1]])
 
 X_or = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y_or = np.array([0, 1, 1, 1])
+y_or = np.array([[0], [1], [1], [1]])
 
-def create_and_train_model(inputs, labels, epochs=500, learning_rate=0.01):
-    model = Sequential([
-        Dense(1, input_dim=2, activation='sigmoid')
-    ])
-    optimizer = Adam(learning_rate=learning_rate)
-    model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    model.fit(inputs, labels, epochs=epochs, verbose=0)
-    return model
+class Perceptron:
+    def __init__(self, size, lr=0.1, epochs=1000):
+        self.w = np.zeros((size, 1))
+        self.b = 0
+        self.lr = lr
+        self.epochs = epochs
 
-model_and = create_and_train_model(X_and, y_and)
-model_or = create_and_train_model(X_or, y_or)
+    def train(self, X, y):
+        for _ in range(self.epochs):
+            for xi, yi in zip(X, y):
+                xi = xi.reshape(-1, 1)
+                z = np.dot(xi.T, self.w) + self.b
+                pred = step(z)
+                err = yi - pred
+                self.w += self.lr * err * xi
+                self.b += self.lr * err
 
+    def predict(self, X):
+        z = np.dot(X, self.w) + self.b
+        return step(z)
 
-def test_model(model, inputs):
-    predictions = model.predict(inputs)
-    predictions = [round(pred[0]) for pred in predictions]
-    return predictions
+p_and = Perceptron(size=2)
+p_and.train(X_and, y_and)
+
+p_or = Perceptron(size=2)
+p_or.train(X_or, y_or)
 
 print("AND Function Predictions:")
-print(test_model(model_and, X_and))
+print(p_and.predict(X_and))
 
 print("\nOR Function Predictions:")
-print(test_model(model_or, X_or))
+print(p_or.predict(X_or))
 
-and_test_input = np.array([[1, 1]])
-or_test_input = np.array([[0, 1]])
+print("\nAND Function Prediction for input [0, 0]:")
+print(p_and.predict(np.array([[0, 0]])))
+print("\nOR Function Prediction for input [0, 0]:")
+print(p_or.predict(np.array([[0, 0]])))
+
+print("\nAND Function Prediction for input [0, 1]:")
+print(p_and.predict(np.array([[0, 1]])))
+print("\nOR Function Prediction for input [0, 1]:")
+print(p_or.predict(np.array([[0, 1]])))
+
+print("\nAND Function Prediction for input [1, 0]:")
+print(p_and.predict(np.array([[1, 0]])))
+print("\nOR Function Prediction for input [1, 0]:")
+print(p_or.predict(np.array([[1, 0]])))
 
 print("\nAND Function Prediction for input [1, 1]:")
-print(test_model(model_and, and_test_input))
-
-print("\nOR Function Prediction for input [0, 1]:")
-print(test_model(model_or, or_test_input))
+print(p_and.predict(np.array([[1, 1]])))
+print("\nOR Function Prediction for input [1, 1]:")
+print(p_or.predict(np.array([[1, 1]])))
